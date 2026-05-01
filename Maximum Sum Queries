@@ -1,0 +1,39 @@
+from typing import List
+
+class Solution:
+    def maximumSumQueries(self, nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:
+        pairs = sorted(zip(nums1, nums2), key=lambda x: -x[0])
+        queries_with_index = sorted([(x, y, i) for i, (x, y) in enumerate(queries)], reverse=True)
+
+        result = [-1] * len(queries)
+        stack = []
+        i = 0
+
+        for x, y, idx in queries_with_index:
+            while i < len(pairs) and pairs[i][0] >= x:
+                a, b = pairs[i]
+                total = a + b
+
+                while stack and stack[-1][1] <= total:
+                    stack.pop()
+
+                if not stack or stack[-1][0] < b:
+                    stack.append((b, total))
+
+                i += 1
+
+            left, right = 0, len(stack) - 1
+            pos = -1
+
+            while left <= right:
+                mid = (left + right) // 2
+                if stack[mid][0] >= y:
+                    pos = mid
+                    right = mid - 1
+                else:
+                    left = mid + 1
+
+            if pos != -1:
+                result[idx] = stack[pos][1]
+
+        return result
