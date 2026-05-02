@@ -1,0 +1,39 @@
+class Solution:
+    def buildMatrix(self, k: int, rowConditions: List[List[int]], colConditions: List[List[int]]) -> List[List[int]]:
+        
+        def topo(edges):
+            graph = defaultdict(list)
+            indeg = [0] * (k + 1)
+            
+            for u, v in edges:
+                graph[u].append(v)
+                indeg[v] += 1
+            
+            q = deque(i for i in range(1, k + 1) if indeg[i] == 0)
+            order = []
+            
+            while q:
+                node = q.popleft()
+                order.append(node)
+                for nei in graph[node]:
+                    indeg[nei] -= 1
+                    if indeg[nei] == 0:
+                        q.append(nei)
+            
+            return order if len(order) == k else []
+        
+        row_order = topo(rowConditions)
+        col_order = topo(colConditions)
+        
+        if not row_order or not col_order:
+            return []
+        
+        pos_r = {v: i for i, v in enumerate(row_order)}
+        pos_c = {v: i for i, v in enumerate(col_order)}
+        
+        res = [[0] * k for _ in range(k)]
+        
+        for num in range(1, k + 1):
+            res[pos_r[num]][pos_c[num]] = num
+        
+        return res
